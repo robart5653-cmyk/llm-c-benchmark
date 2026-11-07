@@ -1,0 +1,52 @@
+name: llm.c CPU benchmark
+
+on:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Show runner resources
+        run: |
+          echo "=== CPU ==="
+          nproc
+          lscpu
+          echo "=== RAM ==="
+          free -h
+          echo "=== Disk ==="
+          df -h
+
+      - name: Clone llm.c
+        run: |
+          git clone --depth 1 https://github.com/karpathy/llm.c.git
+          cd llm.c
+          git rev-parse HEAD
+
+      - name: Download starter pack
+        working-directory: llm.c
+        run: |
+          chmod +x ./dev/download_starter_pack.sh
+          ./dev/download_starter_pack.sh
+          ls -lh gpt2_124M*
+
+      - name: Compile CPU OpenMP build
+        working-directory: llm.c
+        run: |
+          clang -O3 -ffast-math -fopenmp \
+            -Wno-unused-result \
+            -Wno-ignored-pragmas \
+            -Wno-unknown-attributes \
+            -march=native \
+            train_gpt2.c -lm -o train_gpt2_omp
+          ls -lh train_gpt2_omp
+
+      - name: Run benchmark
+        working-directory: llm.c
+        env:
+          OMP_NUM_THREADS: "4"
+        run: |
+          echo "OMP_NUM_THREADS=$OMP_NUM_THREADS"
+          ./train_gpt2_omp
