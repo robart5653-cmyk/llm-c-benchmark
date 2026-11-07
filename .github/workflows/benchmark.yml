@@ -35,7 +35,7 @@ jobs:
       - name: Compile CPU OpenMP build
         working-directory: llm.c
         run: |
-          clang -O3 -ffast-math -fopenmp \
+          gcc -O3 -ffast-math -fopenmp \
             -Wno-unused-result \
             -Wno-ignored-pragmas \
             -Wno-unknown-attributes \
