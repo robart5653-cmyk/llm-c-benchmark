@@ -9,6 +9,9 @@ jobs:
     timeout-minutes: 60
 
     steps:
+      - name: Check out benchmark repository
+        uses: actions/checkout@v4
+
       - name: Show runner resources
         run: |
           echo "=== CPU ==="
@@ -34,6 +37,7 @@ jobs:
 
       - name: Add checkpoint saving
         run: |
+          test -f patches/add_checkpoint.py
           python3 patches/add_checkpoint.py llm.c/train_gpt2.c
 
       - name: Compile CPU OpenMP build
