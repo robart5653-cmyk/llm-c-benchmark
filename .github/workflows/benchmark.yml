@@ -32,6 +32,10 @@ jobs:
           ./dev/download_starter_pack.sh
           ls -lh gpt2_124M*
 
+      - name: Add checkpoint saving
+        run: |
+          python3 patches/add_checkpoint.py llm.c/train_gpt2.c
+
       - name: Compile CPU OpenMP build
         working-directory: llm.c
         run: |
@@ -50,3 +54,12 @@ jobs:
         run: |
           echo "OMP_NUM_THREADS=$OMP_NUM_THREADS"
           ./train_gpt2_omp
+          ls -lh gpt2_124M_finetuned.bin
+
+      - name: Upload trained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt2-124m-finetuned
+          path: llm.c/gpt2_124M_finetuned.bin
+          if-no-files-found: error
+          retention-days: 14
